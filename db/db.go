@@ -7,13 +7,11 @@ import (
 
 	"go-tutuplapak-user/config"
 
-	_ "github.com/lib/pq" // PostgreSQL driver
+	_ "github.com/lib/pq"
 )
 
-// DBConnection holds the active database connection.
 var DBConnection *sql.DB
 
-// InitDB initializes the database connection and returns the connection.
 func InitDB(cfg config.Config) (*sql.DB, error) {
 	dsn := fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
@@ -34,7 +32,6 @@ func InitDB(cfg config.Config) (*sql.DB, error) {
 	return DBConnection, nil
 }
 
-// CloseDB closes the active database connection.
 func CloseDB() {
 	if DBConnection != nil {
 		if err := DBConnection.Close(); err != nil {

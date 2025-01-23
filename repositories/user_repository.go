@@ -2,6 +2,8 @@ package repositories
 
 import (
 	"database/sql"
+	"errors"
+	"fmt"
 	"go-tutuplapak-user/models"
 )
 
@@ -25,9 +27,18 @@ func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 	query := "SELECT * FROM users WHERE email = $1"
 	row := r.db.QueryRow(query, email)
 	var user models.User
-	if err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password, &user.BankAccountName, &user.BankAccountHolder, &user.BankAccountNumber); err != nil {
-		return nil, err
+	err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password,
+		&user.FileID, &user.FileURI, &user.FileThumbnailURI,
+		&user.BankAccountName, &user.BankAccountHolder, &user.BankAccountNumber,
+		&user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error querying user: %w", err)
 	}
+
 	return &user, nil
 }
 
@@ -35,9 +46,18 @@ func (r *userRepository) FindByPhone(phone string) (*models.User, error) {
 	query := "SELECT * FROM users WHERE phone = $1"
 	row := r.db.QueryRow(query, phone)
 	var user models.User
-	if err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password, &user.BankAccountName, &user.BankAccountHolder, &user.BankAccountNumber); err != nil {
-		return nil, err
+	err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password,
+		&user.FileID, &user.FileURI, &user.FileThumbnailURI,
+		&user.BankAccountName, &user.BankAccountHolder, &user.BankAccountNumber,
+		&user.CreatedAt, &user.UpdatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("error querying user: %w", err)
 	}
+
 	return &user, nil
 }
 

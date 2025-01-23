@@ -6,7 +6,6 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-// GenerateJWT generates a new JWT token.
 func GenerateJWT(identifier, secret string, expiryHours int) (string, error) {
 	claims := jwt.MapClaims{
 		"identifier": identifier,

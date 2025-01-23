@@ -10,5 +10,11 @@ CREATE TABLE users (
     bank_account_holder VARCHAR(255) DEFAULT '', -- Bank account holder
     bank_account_number VARCHAR(50) DEFAULT '', -- Bank account number
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Timestamp of user creation
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP -- Timestamp of last update
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Timestamp of last update
 );
+
+-- Add indexes for performance optimization
+CREATE INDEX idx_users_email ON users (email);
+CREATE INDEX idx_users_phone ON users (phone);
+CREATE INDEX idx_users_file_id ON users (file_id);
+CREATE INDEX idx_users_bank_account_number ON users (bank_account_number);

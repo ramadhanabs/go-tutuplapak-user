@@ -16,7 +16,6 @@ type Config struct {
 	JWTExpiryHours int
 }
 
-// LoadConfig loads configuration from environment variables or a `.env` file.
 func LoadConfig() Config {
 	viper.SetConfigFile(".env")
 	if err := viper.ReadInConfig(); err != nil {
@@ -36,7 +35,7 @@ func LoadConfig() Config {
 	}
 
 	if config.JWTExpiryHours == 0 {
-		config.JWTExpiryHours = 24 // Default to 24 hours
+		config.JWTExpiryHours = 24
 	}
 
 	return config

@@ -12,6 +12,18 @@ type AuthController struct {
 	authService services.AuthService
 }
 
+type LoginPhoneResponse struct {
+	Phone string `json:"phone"`
+	Email string `json:"email"`
+	Token string `json:"token"`
+}
+
+type LoginEmailResponse struct {
+	Email string `json:"email"`
+	Phone string `json:"phone"`
+	Token string `json:"token"`
+}
+
 func NewAuthController(authService services.AuthService) *AuthController {
 	return &AuthController{authService: authService}
 }
@@ -33,7 +45,13 @@ func (c *AuthController) LoginWithEmail(ctx *gin.Context) {
 		return
 	}
 
-	utils.RespondJSON(ctx, http.StatusOK, gin.H{"email": user.Email, "token": token})
+	userResponse := utils.ToUserResponse(user)
+
+	utils.RespondJSON(ctx, http.StatusOK, LoginEmailResponse{
+		Email: userResponse.Email,
+		Phone: userResponse.Phone,
+		Token: token,
+	})
 }
 
 func (c *AuthController) LoginWithPhone(ctx *gin.Context) {
@@ -53,7 +71,13 @@ func (c *AuthController) LoginWithPhone(ctx *gin.Context) {
 		return
 	}
 
-	utils.RespondJSON(ctx, http.StatusOK, gin.H{"phone": user.Phone, "token": token})
+	userResponse := utils.ToUserResponse(user)
+
+	utils.RespondJSON(ctx, http.StatusOK, LoginPhoneResponse{
+		Phone: userResponse.Phone,
+		Email: userResponse.Email,
+		Token: token,
+	})
 }
 
 func (c *AuthController) RegisterWithEmail(ctx *gin.Context) {
@@ -77,7 +101,9 @@ func (c *AuthController) RegisterWithEmail(ctx *gin.Context) {
 		return
 	}
 
-	utils.RespondJSON(ctx, http.StatusCreated, gin.H{"email": user.Email, "token": token})
+	userResponse := utils.ToUserResponse(user)
+
+	utils.RespondJSON(ctx, http.StatusCreated, gin.H{"email": userResponse.Email, "token": token})
 }
 
 func (c *AuthController) RegisterWithPhone(ctx *gin.Context) {
@@ -96,10 +122,14 @@ func (c *AuthController) RegisterWithPhone(ctx *gin.Context) {
 		status := http.StatusConflict
 		if err.Error() == "phone already exists" {
 			status = http.StatusConflict
+		} else {
+			status = http.StatusBadRequest
 		}
 		utils.RespondError(ctx, status, err.Error())
 		return
 	}
 
-	utils.RespondJSON(ctx, http.StatusCreated, gin.H{"phone": user.Phone, "token": token})
+	userResponse := utils.ToUserResponse(user)
+
+	utils.RespondJSON(ctx, http.StatusCreated, gin.H{"phone": userResponse.Phone, "token": token})
 }

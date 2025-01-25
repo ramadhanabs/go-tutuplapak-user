@@ -1,7 +1,7 @@
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,                     -- Auto-incrementing unique identifier
-    email VARCHAR(255) UNIQUE DEFAULT '',      -- Email address (unique, optional)
-    phone VARCHAR(20) UNIQUE DEFAULT '',       -- Phone number (unique, optional)
+    email VARCHAR(255) DEFAULT NULL,      -- Email address (unique, optional)
+    phone VARCHAR(20) DEFAULT NULL,       -- Phone number (unique, optional)
     password VARCHAR(255) NOT NULL,            -- Hashed password
     file_id VARCHAR(255) DEFAULT '',           -- Optional file ID
     file_uri TEXT DEFAULT '',                  -- Optional file URI
@@ -18,3 +18,5 @@ CREATE INDEX idx_users_email ON users (email);
 CREATE INDEX idx_users_phone ON users (phone);
 CREATE INDEX idx_users_file_id ON users (file_id);
 CREATE INDEX idx_users_bank_account_number ON users (bank_account_number);
+CREATE UNIQUE INDEX idx_users_email_unique ON users (email) WHERE email IS NOT NULL;
+CREATE UNIQUE INDEX idx_users_phone_unique ON users (phone) WHERE phone IS NOT NULL;

@@ -24,14 +24,17 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *userRepository) FindByEmail(email string) (*models.User, error) {
-	query := "SELECT * FROM users WHERE email = $1"
-	row := r.db.QueryRow(query, email)
-	var user models.User
-	err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password,
-		&user.FileID, &user.FileURI, &user.FileThumbnailURI,
-		&user.BankAccountName, &user.BankAccountHolder, &user.BankAccountNumber,
-		&user.CreatedAt, &user.UpdatedAt)
+	query := "SELECT id, email, phone, password, created_at, updated_at FROM users WHERE email = $1"
 
+	var user models.User
+	err := r.db.QueryRow(query, email).Scan(
+		&user.ID,
+		&user.Email,
+		&user.Phone,
+		&user.Password,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -81,6 +84,7 @@ func (r *userRepository) PhoneExists(phone string) (bool, error) {
 
 func (r *userRepository) CreateUser(user *models.User) error {
 	query := "INSERT INTO users (email, phone, password, bank_account_name, bank_account_holder, bank_account_number) VALUES ($1, $2, $3, $4, $5, $6)"
+
 	_, err := r.db.Exec(query, user.Email, user.Phone, user.Password, user.BankAccountName, user.BankAccountHolder, user.BankAccountNumber)
 	return err
 }

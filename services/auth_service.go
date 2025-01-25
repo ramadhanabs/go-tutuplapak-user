@@ -1,6 +1,7 @@
 package services
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"go-tutuplapak-user/config"
@@ -39,7 +40,7 @@ func (s *authService) LoginWithEmail(email, password string) (*models.User, stri
 		return nil, "", errors.New("invalid password")
 	}
 
-	token, err := utils.GenerateJWT(user.Email, s.cfg.JWTSecret, s.cfg.JWTExpiryHours)
+	token, err := utils.GenerateJWT(email, s.cfg.JWTSecret, s.cfg.JWTExpiryHours)
 	if err != nil {
 		return nil, "", err
 	}
@@ -61,7 +62,7 @@ func (s *authService) LoginWithPhone(phone, password string) (*models.User, stri
 		return nil, "", errors.New("invalid password")
 	}
 
-	token, err := utils.GenerateJWT(user.Phone, s.cfg.JWTSecret, s.cfg.JWTExpiryHours)
+	token, err := utils.GenerateJWT(phone, s.cfg.JWTSecret, s.cfg.JWTExpiryHours)
 	if err != nil {
 		return nil, "", err
 	}
@@ -84,7 +85,7 @@ func (s *authService) RegisterWithEmail(email, password string) (*models.User, s
 	}
 
 	user := &models.User{
-		Email:    email,
+		Email:    sql.NullString{String: email, Valid: email != ""},
 		Password: hashedPassword,
 	}
 
@@ -101,6 +102,11 @@ func (s *authService) RegisterWithEmail(email, password string) (*models.User, s
 }
 
 func (s *authService) RegisterWithPhone(phone, password string) (*models.User, string, error) {
+
+	if !utils.IsValidPhoneNumber(phone) {
+		return nil, "", errors.New("phone number must start with '+' and be followed by digits")
+	}
+
 	exists, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
 		return nil, "", err
@@ -115,7 +121,7 @@ func (s *authService) RegisterWithPhone(phone, password string) (*models.User, s
 	}
 
 	user := &models.User{
-		Phone:    phone,
+		Phone:    sql.NullString{String: phone, Valid: phone != ""},
 		Password: hashedPassword,
 	}
 

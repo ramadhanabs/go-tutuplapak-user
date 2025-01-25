@@ -24,7 +24,7 @@ func NewUserRepository(db *sql.DB) UserRepository {
 }
 
 func (r *userRepository) FindByEmail(email string) (*models.User, error) {
-	query := "SELECT id, email, phone, password, created_at, updated_at FROM users WHERE email = $1"
+	query := "SELECT id, email, phone, password FROM users WHERE email = $1"
 
 	var user models.User
 	err := r.db.QueryRow(query, email).Scan(
@@ -32,8 +32,6 @@ func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 		&user.Email,
 		&user.Phone,
 		&user.Password,
-		&user.CreatedAt,
-		&user.UpdatedAt,
 	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -46,13 +44,10 @@ func (r *userRepository) FindByEmail(email string) (*models.User, error) {
 }
 
 func (r *userRepository) FindByPhone(phone string) (*models.User, error) {
-	query := "SELECT * FROM users WHERE phone = $1"
+	query := "SELECT id, email, phone, password FROM users WHERE phone = $1"
 	row := r.db.QueryRow(query, phone)
 	var user models.User
-	err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password,
-		&user.FileID, &user.FileURI, &user.FileThumbnailURI,
-		&user.BankAccountName, &user.BankAccountHolder, &user.BankAccountNumber,
-		&user.CreatedAt, &user.UpdatedAt)
+	err := row.Scan(&user.ID, &user.Email, &user.Phone, &user.Password)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

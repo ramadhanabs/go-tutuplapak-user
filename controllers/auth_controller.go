@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"go-tutuplapak-user/services"
 	"go-tutuplapak-user/utils"
 	"net/http"
@@ -12,13 +13,13 @@ type AuthController struct {
 	authService services.AuthService
 }
 
-type LoginPhoneResponse struct {
+type LoginRegisterPhoneResp struct {
 	Phone string `json:"phone"`
 	Email string `json:"email"`
 	Token string `json:"token"`
 }
 
-type LoginEmailResponse struct {
+type LoginRegisterEmailResp struct {
 	Email string `json:"email"`
 	Phone string `json:"phone"`
 	Token string `json:"token"`
@@ -29,6 +30,7 @@ func NewAuthController(authService services.AuthService) *AuthController {
 }
 
 func (c *AuthController) LoginWithEmail(ctx *gin.Context) {
+
 	var req struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=8,max=32"`
@@ -41,13 +43,17 @@ func (c *AuthController) LoginWithEmail(ctx *gin.Context) {
 
 	user, token, err := c.authService.LoginWithEmail(req.Email, req.Password)
 	if err != nil {
+		if errors.Is(err, utils.ErrInternal) {
+			utils.RespondError(ctx, http.StatusInternalServerError, utils.ErrInternal.Error())
+			return
+		}
 		utils.RespondError(ctx, http.StatusNotFound, err.Error())
 		return
 	}
 
 	userResponse := utils.ToUserResponse(user)
 
-	utils.RespondJSON(ctx, http.StatusOK, LoginEmailResponse{
+	utils.RespondJSON(ctx, http.StatusOK, LoginRegisterEmailResp{
 		Email: userResponse.Email,
 		Phone: userResponse.Phone,
 		Token: token,
@@ -55,6 +61,7 @@ func (c *AuthController) LoginWithEmail(ctx *gin.Context) {
 }
 
 func (c *AuthController) LoginWithPhone(ctx *gin.Context) {
+
 	var req struct {
 		Phone    string `json:"phone" binding:"required"`
 		Password string `json:"password" binding:"required,min=8,max=32"`
@@ -67,13 +74,17 @@ func (c *AuthController) LoginWithPhone(ctx *gin.Context) {
 
 	user, token, err := c.authService.LoginWithPhone(req.Phone, req.Password)
 	if err != nil {
+		if errors.Is(err, utils.ErrInternal) {
+			utils.RespondError(ctx, http.StatusInternalServerError, utils.ErrInternal.Error())
+			return
+		}
 		utils.RespondError(ctx, http.StatusNotFound, err.Error())
 		return
 	}
 
 	userResponse := utils.ToUserResponse(user)
 
-	utils.RespondJSON(ctx, http.StatusOK, LoginPhoneResponse{
+	utils.RespondJSON(ctx, http.StatusOK, LoginRegisterPhoneResp{
 		Phone: userResponse.Phone,
 		Email: userResponse.Email,
 		Token: token,
@@ -81,6 +92,7 @@ func (c *AuthController) LoginWithPhone(ctx *gin.Context) {
 }
 
 func (c *AuthController) RegisterWithEmail(ctx *gin.Context) {
+
 	var req struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required,min=8,max=32"`
@@ -93,6 +105,11 @@ func (c *AuthController) RegisterWithEmail(ctx *gin.Context) {
 
 	user, token, err := c.authService.RegisterWithEmail(req.Email, req.Password)
 	if err != nil {
+		if errors.Is(err, utils.ErrInternal) {
+			utils.RespondError(ctx, http.StatusInternalServerError, utils.ErrInternal.Error())
+			return
+		}
+
 		status := http.StatusConflict
 		if err.Error() == "email already exists" {
 			status = http.StatusConflict
@@ -103,10 +120,15 @@ func (c *AuthController) RegisterWithEmail(ctx *gin.Context) {
 
 	userResponse := utils.ToUserResponse(user)
 
-	utils.RespondJSON(ctx, http.StatusCreated, gin.H{"email": userResponse.Email, "token": token})
+	utils.RespondJSON(ctx, http.StatusCreated, LoginRegisterEmailResp{
+		Email: userResponse.Email,
+		Phone: userResponse.Phone,
+		Token: token,
+	})
 }
 
 func (c *AuthController) RegisterWithPhone(ctx *gin.Context) {
+
 	var req struct {
 		Phone    string `json:"phone" binding:"required"`
 		Password string `json:"password" binding:"required,min=8,max=32"`
@@ -119,6 +141,11 @@ func (c *AuthController) RegisterWithPhone(ctx *gin.Context) {
 
 	user, token, err := c.authService.RegisterWithPhone(req.Phone, req.Password)
 	if err != nil {
+		if errors.Is(err, utils.ErrInternal) {
+			utils.RespondError(ctx, http.StatusInternalServerError, utils.ErrInternal.Error())
+			return
+		}
+
 		status := http.StatusConflict
 		if err.Error() == "phone already exists" {
 			status = http.StatusConflict
@@ -131,5 +158,9 @@ func (c *AuthController) RegisterWithPhone(ctx *gin.Context) {
 
 	userResponse := utils.ToUserResponse(user)
 
-	utils.RespondJSON(ctx, http.StatusCreated, gin.H{"phone": userResponse.Phone, "token": token})
+	utils.RespondJSON(ctx, http.StatusCreated, LoginRegisterPhoneResp{
+		Phone: userResponse.Phone,
+		Email: userResponse.Email,
+		Token: token,
+	})
 }

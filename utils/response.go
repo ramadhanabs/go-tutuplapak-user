@@ -2,11 +2,16 @@ package utils
 
 import (
 	"database/sql"
+	"errors"
 	"go-tutuplapak-user/models"
 	"net/http"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
+)
+
+var (
+	ErrInternal = errors.New("internal server error")
 )
 
 func RespondJSON(ctx *gin.Context, status int, payload interface{}) {

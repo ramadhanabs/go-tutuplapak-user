@@ -29,7 +29,7 @@ func NewAuthService(userRepo repositories.UserRepository, cfg config.Config) Aut
 func (s *authService) LoginWithEmail(email, password string) (*models.User, string, error) {
 	user, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return nil, "", fmt.Errorf("error checking user: %w", err)
+		return nil, "", fmt.Errorf("%w: %v", utils.ErrInternal, err)
 	}
 
 	if user == nil {
@@ -51,7 +51,7 @@ func (s *authService) LoginWithEmail(email, password string) (*models.User, stri
 func (s *authService) LoginWithPhone(phone, password string) (*models.User, string, error) {
 	user, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
-		return nil, "", fmt.Errorf("error checking user: %w", err)
+		return nil, "", fmt.Errorf("%w: %v", utils.ErrInternal, err)
 	}
 
 	if user == nil {
@@ -73,7 +73,7 @@ func (s *authService) LoginWithPhone(phone, password string) (*models.User, stri
 func (s *authService) RegisterWithEmail(email, password string) (*models.User, string, error) {
 	exists, err := s.userRepo.FindByEmail(email)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("%w: %v", utils.ErrInternal, err)
 	}
 	if exists != nil {
 		return nil, "", errors.New("email already exists")
@@ -109,7 +109,7 @@ func (s *authService) RegisterWithPhone(phone, password string) (*models.User, s
 
 	exists, err := s.userRepo.FindByPhone(phone)
 	if err != nil {
-		return nil, "", err
+		return nil, "", fmt.Errorf("%w: %v", utils.ErrInternal, err)
 	}
 	if exists != nil {
 		return nil, "", errors.New("phone already exists")
